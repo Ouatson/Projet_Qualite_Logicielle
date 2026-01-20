@@ -11,9 +11,9 @@ export class RegisterPage extends BasePage {
   private readonly genderFemaleRadio: Locator;
   private readonly firstNameInput: Locator;
   private readonly lastNameInput: Locator;
-  private readonly dateOfBirthDay: Locator;
-  private readonly dateOfBirthMonth: Locator;
-  private readonly dateOfBirthYear: Locator;
+  // private readonly dateOfBirthDay: Locator;
+  // private readonly dateOfBirthMonth: Locator;
+  // private readonly dateOfBirthYear: Locator;
   private readonly emailInput: Locator;
   private readonly companyInput: Locator;
   private readonly newsletterCheckbox: Locator;
@@ -31,12 +31,12 @@ export class RegisterPage extends BasePage {
     this.genderFemaleRadio = page.locator('#gender-female');
     this.firstNameInput = page.locator('#FirstName');
     this.lastNameInput = page.locator('#LastName');
-    this.dateOfBirthDay = page.locator('select[name="DateOfBirthDay"]');
-    this.dateOfBirthMonth = page.locator('select[name="DateOfBirthMonth"]');
-    this.dateOfBirthYear = page.locator('select[name="DateOfBirthYear"]');
+    // this.dateOfBirthDay = page.locator('select[name="DateOfBirthDay"]');
+    // this.dateOfBirthMonth = page.locator('select[name="DateOfBirthMonth"]');
+    // this.dateOfBirthYear = page.locator('select[name="DateOfBirthYear"]');
     this.emailInput = page.locator('#Email');
     this.companyInput = page.locator('#Company');
-    this.newsletterCheckbox = page.locator('#Newsletter');
+    this.newsletterCheckbox = page.locator('#NewsLetterSubscriptions_0__IsActive');
     this.passwordInput = page.locator('#Password');
     this.confirmPasswordInput = page.locator('#ConfirmPassword');
     this.registerButton = page.locator('#register-button');
@@ -59,7 +59,6 @@ export class RegisterPage extends BasePage {
     gender?: 'Male' | 'Female';
     firstName: string;
     lastName: string;
-    dateOfBirth?: { day: string; month: string; year: string };
     email: string;
     company?: string;
     newsletter?: boolean;
@@ -74,12 +73,6 @@ export class RegisterPage extends BasePage {
 
     await this.firstNameInput.fill(userData.firstName);
     await this.lastNameInput.fill(userData.lastName);
-
-    if (userData.dateOfBirth) {
-      await this.dateOfBirthDay.selectOption(userData.dateOfBirth.day);
-      await this.dateOfBirthMonth.selectOption(userData.dateOfBirth.month);
-      await this.dateOfBirthYear.selectOption(userData.dateOfBirth.year);
-    }
 
     await this.emailInput.fill(userData.email);
 
