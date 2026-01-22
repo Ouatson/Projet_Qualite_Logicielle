@@ -51,8 +51,16 @@ export default defineConfig({
     },
 
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+              use: {
+          headless: false,
+          userAgent:
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+          viewport: { width: 1280, height: 800 },
+          actionTimeout: 15000,
+          navigationTimeout: 30000,
+          screenshot: 'only-on-failure',
+          video: 'retain-on-failure',
+        },            
     },
 
     /* Test against mobile viewports. */
