@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
 
 /**
@@ -7,6 +7,7 @@ import { BasePage } from './BasePage';
  */
 export class ProductPage extends BasePage {
   // Locators
+  private readonly productDetailsRoot: Locator;
   private readonly productName: Locator;
   private readonly productPrice: Locator;
   private readonly productDescription: Locator;
@@ -22,12 +23,17 @@ export class ProductPage extends BasePage {
     super(page);
     
     // Initialize locators
+    this.productDetailsRoot = page.locator('.product-details-page');
     this.productName = page.locator('.product-name h1');
     this.productPrice = page.locator('.product-price span');
     this.productDescription = page.locator('.full-description');
     this.quantityInput = page.locator('.qty-input');
-    this.addToCartButton = page.locator('#add-to-cart-button-1, #add-to-cart-button-2, #add-to-cart-button-4');
-    this.addToWishlistButton = page.locator('#add-to-wishlist-button-1, #add-to-wishlist-button-2, #add-to-wishlist-button-4');
+    // this.addToCartButton = page.locator('.product-box-add-to-cart-button');
+    // this.addToWishlistButton = page.locator('.add-to-wishlist-button');
+    // this.addToCartButton = page.locator('#add-to-cart-button-5');
+    // this.addToWishlistButton = page.locator('#add-to-wishlist-button-5');
+    this.addToCartButton = page.locator('button[id^="add-to-cart-button-"]');
+    this.addToWishlistButton = page.locator('button[id^="add-to-wishlist-button-"]');
     this.addToCompareButton = page.locator('.add-to-compare-list-button');
     this.emailAFriendButton = page.locator('.email-a-friend-button');
     this.successNotification = page.locator('#bar-notification');
@@ -60,7 +66,8 @@ export class ProductPage extends BasePage {
    * Add product to cart
    */
   async addToCart(): Promise<void> {
-    await this.addToCartButton.first().click();
+    // await this.addToCartButton.first().click();
+    await this.addToCartButton.click();
   }
 
   /**
@@ -76,7 +83,8 @@ export class ProductPage extends BasePage {
    * Add product to wishlist
    */
   async addToWishlist(): Promise<void> {
-    await this.addToWishlistButton.first().click();
+    // await this.addToWishlistButton.first().click();
+    await this.addToWishlistButton.click();
   }
 
   /**

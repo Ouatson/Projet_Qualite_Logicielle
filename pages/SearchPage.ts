@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
 
 /**
@@ -24,7 +24,7 @@ export class SearchPage extends BasePage {
     this.searchButton = page.locator('button.search-button');
     this.searchResults = page.locator('.search-results');
     this.noResultsMessage = page.locator('.no-result');
-    this.productItems = page.locator('.product-item');
+    this.productItems = page.locator('.item-box');
     this.advancedSearchCheckbox = page.locator('#advs');
     this.categoryDropdown = page.locator('#cid');
     this.manufacturerDropdown = page.locator('#mid');
@@ -68,7 +68,13 @@ export class SearchPage extends BasePage {
    * @param index - Product index (0-based)
    */
   async clickProduct(index: number): Promise<void> {
-    await this.productItems.nth(index).locator('.product-title a').click();
+    const count = await this.productItems.count();
+    if (index >= count) throw new Error('Index out of bounds');
+
+    await Promise.all([
+      this.page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(() => {}),
+      this.productItems.nth(index).locator('.product-title a').click()
+    ]);
   }
 
   /**
