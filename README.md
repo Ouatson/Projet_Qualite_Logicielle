@@ -212,14 +212,6 @@ Feature files describe test scenarios in plain language using Gherkin syntax:
 - **search.feature**: Product search functionality
 - **shopping-cart.feature**: Shopping cart operations
 
-## CI/CD Integration
-
-The project includes GitHub Actions workflow (`.github/workflows/playwright.yml`) that:
-- Installs dependencies
-- Installs Playwright browsers
-- Runs all tests on push and pull requests
-- Uploads test artifacts and reports
-
 ## Browser Configuration
 
 The project is configured to run tests on:
@@ -228,19 +220,6 @@ The project is configured to run tests on:
 - **WebKit** (Desktop Safari)
 
 Configure browsers in `playwright.config.ts`.
-
-## Best Practices
-
-1. **Page Objects**: Keep page interactions in page objects, not in step definitions
-2. **Reusable Steps**: Create generic, reusable step definitions
-3. **Descriptive Scenarios**: Write clear, business-readable Gherkin scenarios
-4. **Wait Strategies**: Use proper wait strategies (avoid hard-coded waits)
-5. **Test Independence**: Each scenario should be independent and runnable in isolation
-
-## Troubleshooting
-
-### DNS/Network Issues in Restricted Environments
-If you encounter `ERR_NAME_NOT_RESOLVED` errors, this typically means the environment has restricted internet access. The test suite is fully functional and will work in environments with proper internet connectivity. The framework, structure, and all configurations are correct.
 
 ### Browser Installation Issues
 If browsers fail to install:
@@ -257,10 +236,9 @@ npx tsc --noEmit
 ### Cucumber Step Not Found
 Make sure step definitions are in `features/step-definitions/` and match the Gherkin syntax exactly.
 
-## License
+### Issues (We decided to put this section in french spécifically for the presentation)
 
-ISC
+## Problèmes rencontrés
 
-## Author
-
-Test Automation Team
+- **Soucis avec le captcha de cloudflare** : Lors de l'exécution des tests, le captcha de cloudflare bloquait l'accès au site. Pour contourner ce problème, nous avions décidé d'essayer de contourner le problème mais même en affichage guidé (headed) cloudflare suspectait l'utilisation d'un bot.
+- **Quelques petits soucis avec gherkin cucumber** : Parfois, certaines étapes n'étaient pas reconnues correctement, ce qui nécessitait de vérifier la correspondance exacte entre les étapes Gherkin et les définitions des steps.
