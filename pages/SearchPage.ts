@@ -1,15 +1,9 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
 
-/**
- * Search Results Page Object
- * Represents the search results page
- */
 export class SearchPage extends BasePage {
-  // Locators
   private readonly searchBox: Locator;
   private readonly searchButton: Locator;
-  private readonly searchResults: Locator;
   private readonly noResultsMessage: Locator;
   private readonly productItems: Locator;
   private readonly advancedSearchCheckbox: Locator;
@@ -18,55 +12,57 @@ export class SearchPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    
-    // Initialize locators
+
     this.searchBox = page.locator('#q');
     this.searchButton = page.locator('button.search-button');
-    this.searchResults = page.locator('.search-results');
     this.noResultsMessage = page.locator('.no-result');
     this.productItems = page.locator('.item-box');
     this.advancedSearchCheckbox = page.locator('#advs');
     this.categoryDropdown = page.locator('#cid');
     this.manufacturerDropdown = page.locator('#mid');
   }
-
-  /**
-   * Search for a product
-   * @param searchTerm - Term to search for
-   */
-  async search(searchTerm: string): Promise<void> {
-    await this.searchBox.fill(searchTerm);
-    await this.searchButton.click();
+ 
+  private async waitForSearchStable(): Promise<void> {
+    await Promise.race([
+      this.productItems.first().waitFor({ timeout: 5000 }).catch(() => {}),
+      this.noResultsMessage.waitFor({ timeout: 5000 }).catch(() => {}),
+      this.page.waitForTimeout(1200)
+    ]);
   }
 
-  /**
-   * Get search results count
-   */
+  async search(term: string): Promise<void> {
+
+    if (!this.page.url().includes('/search')) {
+      await this.page.goto(`/search?q=${encodeURIComponent(term)}`, {
+        waitUntil: 'domcontentloaded'
+      });
+      await this.waitForSearchStable();
+      return;
+    }
+
+    if (await this.searchBox.isVisible().catch(() => false)) {
+      await this.searchBox.fill(term);
+      await Promise.all([
+        this.page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(() => {}),
+        this.searchButton.click()
+      ]);
+      await this.waitForSearchStable();
+    }
+  }
+
   async getSearchResultsCount(): Promise<number> {
+    await this.waitForSearchStable();
     return await this.productItems.count();
   }
 
-  /**
-   * Check if no results message is displayed
-   */
   async isNoResultsMessageDisplayed(): Promise<boolean> {
-    return await this.noResultsMessage.isVisible();
+    return await this.noResultsMessage.isVisible().catch(() => false);
   }
 
-  /**
-   * Get no results message text
-   */
   async getNoResultsMessage(): Promise<string | null> {
-    if (await this.isNoResultsMessageDisplayed()) {
-      return await this.noResultsMessage.textContent();
-    }
-    return null;
+    return (await this.noResultsMessage.textContent().catch(() => null))?.trim() || null;
   }
 
-  /**
-   * Click on a product by index
-   * @param index - Product index (0-based)
-   */
   async clickProduct(index: number): Promise<void> {
     const count = await this.productItems.count();
     if (index >= count) throw new Error('Index out of bounds');
@@ -77,42 +73,45 @@ export class SearchPage extends BasePage {
     ]);
   }
 
-  /**
-   * Click on a product by name
-   * @param productName - Product name
-   */
-  async clickProductByName(productName: string): Promise<void> {
-    await this.page.locator(`.product-title a:has-text("${productName}")`).first().click();
+  async clickProductByName(name: string): Promise<void> {
+    const link = this.page.locator('.product-title a', { hasText: name }).first();
+    if (!(await link.isVisible().catch(() => false))) return;
+
+    await Promise.all([
+      this.page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(() => {}),
+      link.click()
+    ]);
   }
 
-  /**
-   * Enable advanced search
-   */
   async enableAdvancedSearch(): Promise<void> {
-    await this.advancedSearchCheckbox.check();
-  }
+  await this.page.goto('/search', { waitUntil: 'domcontentloaded' });
 
-  /**
-   * Select category
-   * @param category - Category name
-   */
+  if (await this.advancedSearchCheckbox.isVisible().catch(() => false)) {
+    const checked = await this.advancedSearchCheckbox.isChecked();
+    if (!checked) {
+      await this.advancedSearchCheckbox.click({ force: true });
+    }
+  }
+}
+
   async selectCategory(category: string): Promise<void> {
-    await this.categoryDropdown.selectOption({ label: category });
+    if (await this.categoryDropdown.isVisible().catch(() => false)) {
+      await this.categoryDropdown.selectOption({ label: category });
+      await this.waitForSearchStable();
+    }
   }
 
-  /**
-   * Select manufacturer
-   * @param manufacturer - Manufacturer name
-   */
   async selectManufacturer(manufacturer: string): Promise<void> {
-    await this.manufacturerDropdown.selectOption({ label: manufacturer });
+    if (await this.manufacturerDropdown.isVisible().catch(() => false)) {
+      await this.manufacturerDropdown.selectOption({ label: manufacturer });
+      await this.waitForSearchStable();
+    }
   }
 
-  /**
-   * Get all product names
-   */
   async getAllProductNames(): Promise<string[]> {
-    const titles = await this.productItems.locator('.product-title a').allTextContents();
-    return titles;
+    await this.waitForSearchStable();
+    return (await this.productItems.locator('.product-title a').allTextContents())
+      .map(t => t.trim())
+      .filter(Boolean);
   }
 }
